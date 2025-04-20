@@ -1,48 +1,48 @@
-from flask import Flask, request
+import json
 import openai
-import os
+import telegram
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-app = Flask(__name__)
+# تفعيل API Key الخاصة بـ OpenAI
+openai.api_key = "YOUR_OPENAI_API_KEY"
 
-# إعداد مفتاح OpenAI (خلي المفتاح مالتك كمتغير بيئي أو بشكل مباشر مؤقتًا)
-openai.api_key = os.getenv("OPENAI_API_KEY", "your-openai-key-here")
+# تفعيل توكن تليجرام
+TELEGRAM_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+updater = Updater(TELEGRAM_TOKEN, use_context=True)
 
-@app.route("/", methods=["GET"])
-def home():
-    return "FetraBot is Alive - فطرة بوت شغّال 💡"
+# تحميل المبادئ الفطرية من ملف JSON
+def load_principles():
+    with open('principles.json', 'r', encoding='utf-8') as file:
+        return json.load(file)['principles']
 
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    data = request.get_json()
+# إرسال الردود بناءً على المبادئ
+def get_fetrabot_response(user_message, principles):
+    # دمج المبادئ الفطرية مع الرسالة
+    prompt = "\n".join(principles) + "\nUser Message: " + user_message + "\nFetrabot's response:"
+    
+    # إرسال الـ prompt إلى OpenAI ليكون فطريًا
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=150,
+        temperature=0.5
+    )
+    return response.choices[0].text.strip()
 
-    message = data.get("message", {}).get("text", "")
-    chat_id = data.get("message", {}).get("chat", {}).get("id")
+# دالة للرد على الرسائل في التليجرام
+def handle_message(update, context):
+    user_message = update.message.text
+    principles = load_principles()
+    
+    # الحصول على الرد الفطري من Fetrabot
+    response = get_fetrabot_response(user_message, principles)
+    
+    # إرسال الرد إلى المستخدم
+    update.message.reply_text(response)
 
-    if message:
-        # إرسال السؤال لـ OpenAI
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "أجب بشكل متوازن، منطقي، ويفهم الفطرة. كن محايدًا بين الأديان ولا تتعصب. كن مساعدًا ذكيًا يعين الباحثين عن الحقيقة."},
-                {"role": "user", "content": message}
-            ]
-        )
-        reply = response.choices[0].message.content
+# إضافة معالج للرسائل النصية
+updater.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
 
-        # إرسال الرد للتليجرام
-        send_telegram_message(chat_id, reply)
-
-    return "ok"
-
-def send_telegram_message(chat_id, text):
-    import requests
-    telegram_token = os.getenv("TELEGRAM_TOKEN", "your-telegram-token-here")
-    url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": text
-    }
-    requests.post(url, json=payload)
-
-if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+# بدء البوت
+updater.start_polling()
+updater.idle()
