@@ -1,33 +1,46 @@
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
+import telebot
+import openai
 
-# إضافة التوكن الذي حصلت عليه من بوت فاثر على تلغرام
-TOKEN = 'YOUR_BOT_TOKEN'
+# المفاتيح
+TELEGRAM_BOT_TOKEN = "توكن_بوتك_هنا"
+OPENAI_API_KEY = "مفتاح_OPENAI_هنا"
 
-# وظيفة الرد على أمر /start
-def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text('مرحبًا بك في بوت الفطرة!')
+# تهيئة
+bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
+openai.api_key = OPENAI_API_KEY
 
-# وظيفة الرد على أمر /help
-def help(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text('اكتب /start للبدء أو أي استفسار وسيتم الرد عليك.')
+# شخصية البوت: صوت الفطرة
+def ask_gpt(question):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+أنت كيان محايد يستخدم العقل النظيف والفطرة السليمة كمرجع.  
+تستند في إجاباتك إلى مصادر إنسانية ودينية، ولكنك لا تتبع طائفة أو مذهب أو فكر محدد.  
+لا تفرض رأيًا، بل تطرح الفكرة بأمانة وتدعو للتفكر.  
+تؤمن أن الحقيقة تتجلى في الصدق، الرحمة، العقل، والعدل، وتبتعد عن الغلو، التعصب، أو التقديس الأعمى للبشر.
+اجعل إجاباتك قريبة من الفطرة: واضحة، راقية، وصادقة.  
+"""
+                },
+                {"role": "user", "content": question}
+            ],
+            temperature=0.6,
+            max_tokens=1000
+        )
+        return response['choices'][0]['message']['content']
+    except Exception as e:
+        return "صار خلل بالتواصل ويا الذكاء الاصطناعي. جرّب بعدين 🌧️"
 
-def main():
-    # إنشاء المحدث (updater) مع التوكن الخاص بك
-    updater = Updater(TOKEN)
+# استقبال الردود
+@bot.message_handler(func=lambda message: True)
+def reply(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    answer = ask_gpt(message.text)
+    bot.reply_to(message, answer)
 
-    # الحصول على الموزع (dispatcher) لربط الأوامر
-    dispatcher = updater.dispatcher
-
-    # إضافة الأوامر إلى الموزع
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(CommandHandler("help", help))
-
-    # بدء البوت
-    updater.start_polling()
-
-    # إبقاء البوت يعمل
-    updater.idle()
-
-if __name__ == '__main__':
-    main()
+# تشغيل
+print("🤍 البوت الفطري يشتغل... اسأل شي بعقلك، وقلبك، وضميرك.")
+bot.polling()
