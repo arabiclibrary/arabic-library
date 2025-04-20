@@ -1,46 +1,57 @@
-import telebot
-import openai
+import json
+import random
+import os
 
-# المفاتيح
-TELEGRAM_BOT_TOKEN = "توكن_بوتك_هنا"
-OPENAI_API_KEY = "مفتاح_OPENAI_هنا"
+# تحميل المبادئ الفطرية من ملف principles.json
+def load_principles():
+    with open('principles.json', 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-# تهيئة
-bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
-openai.api_key = OPENAI_API_KEY
+# تحميل المحادثات السابقة من ملف memory.json
+def load_memory():
+    if os.path.exists('memory.json'):
+        with open('memory.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    else:
+        return []
 
-# شخصية البوت: صوت الفطرة
-def ask_gpt(question):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": """
-أنت كيان محايد يستخدم العقل النظيف والفطرة السليمة كمرجع.  
-تستند في إجاباتك إلى مصادر إنسانية ودينية، ولكنك لا تتبع طائفة أو مذهب أو فكر محدد.  
-لا تفرض رأيًا، بل تطرح الفكرة بأمانة وتدعو للتفكر.  
-تؤمن أن الحقيقة تتجلى في الصدق، الرحمة، العقل، والعدل، وتبتعد عن الغلو، التعصب، أو التقديس الأعمى للبشر.
-اجعل إجاباتك قريبة من الفطرة: واضحة، راقية، وصادقة.  
-"""
-                },
-                {"role": "user", "content": question}
-            ],
-            temperature=0.6,
-            max_tokens=1000
-        )
-        return response['choices'][0]['message']['content']
-    except Exception as e:
-        return "صار خلل بالتواصل ويا الذكاء الاصطناعي. جرّب بعدين 🌧️"
+# حفظ المحادثات في ملف memory.json
+def save_memory(memory):
+    with open('memory.json', 'w', encoding='utf-8') as f:
+        json.dump(memory, f, ensure_ascii=False, indent=4)
 
-# استقبال الردود
-@bot.message_handler(func=lambda message: True)
-def reply(message):
-    bot.send_chat_action(message.chat.id, 'typing')
-    answer = ask_gpt(message.text)
-    bot.reply_to(message, answer)
+# تحسين الردود بناءً على المحادثات السابقة
+def improve_response(user_input, memory):
+    response = "أفهم ما تقول، سأتعلم وأحسن إجابتي في المستقبل."
+    
+    if user_input.lower() in memory:
+        response = random.choice(memory[user_input.lower()])
+    
+    return response
 
-# تشغيل
-print("🤍 البوت الفطري يشتغل... اسأل شي بعقلك، وقلبك، وضميرك.")
-bot.polling()
+# إضافة المحادثة إلى الذاكرة
+def add_to_memory(user_input, bot_response, memory):
+    if user_input.lower() not in memory:
+        memory[user_input.lower()] = []
+    memory[user_input.lower()].append(bot_response)
+
+def run_bot():
+    principles = load_principles()
+    memory = load_memory()
+    
+    print("مرحبًا! أنا بوت فطري. كيف يمكنني مساعدتك اليوم؟")
+    
+    while True:
+        user_input = input("أنت: ")
+        if user_input.lower() == 'خروج':
+            print("إلى اللقاء!")
+            break
+        
+        bot_response = improve_response(user_input, memory)
+        print(f"البوت: {bot_response}")
+        
+        add_to_memory(user_input, bot_response, memory)
+        save_memory(memory)
+
+if __name__ == "__main__":
+    run_bot()
