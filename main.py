@@ -2,32 +2,45 @@ import json
 import openai
 import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from dotenv import load_dotenv
+import os
+
+# تحميل القيم من ملف .env
+load_dotenv()
 
 # تفعيل API Key الخاصة بـ OpenAI
-openai.api_key = "YOUR_OPENAI_API_KEY"
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # تفعيل توكن تليجرام
-TELEGRAM_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 updater = Updater(TELEGRAM_TOKEN, use_context=True)
 
 # تحميل المبادئ الفطرية من ملف JSON
 def load_principles():
-    with open('principles.json', 'r', encoding='utf-8') as file:
-        return json.load(file)['principles']
+    try:
+        with open('principles.json', 'r', encoding='utf-8') as file:
+            return json.load(file)['principles']
+    except Exception as e:
+        print(f"Error loading principles.json: {e}")
+        return []
 
 # إرسال الردود بناءً على المبادئ
 def get_fetrabot_response(user_message, principles):
-    # دمج المبادئ الفطرية مع الرسالة
-    prompt = "\n".join(principles) + "\nUser Message: " + user_message + "\nFetrabot's response:"
-    
-    # إرسال الـ prompt إلى OpenAI ليكون فطريًا
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=150,
-        temperature=0.5
-    )
-    return response.choices[0].text.strip()
+    try:
+        # دمج المبادئ الفطرية مع الرسالة
+        prompt = "\n".join(principles) + "\nUser Message: " + user_message + "\nFetrabot's response:"
+        
+        # إرسال الـ prompt إلى OpenAI ليكون فطريًا
+        response = openai.Completion.create(
+            engine="text-davinci-003",  # يمكن تعديل المحرك هنا حسب الحاجة
+            prompt=prompt,
+            max_tokens=150,
+            temperature=0.5
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        print(f"Error getting response from OpenAI: {e}")
+        return "عذراً، حدث خطأ أثناء معالجة رسالتك."
 
 # دالة للرد على الرسائل في التليجرام
 def handle_message(update, context):
