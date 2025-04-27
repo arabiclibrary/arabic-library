@@ -1,6 +1,0 @@
-arabic_library_project/
-├── arabic_library.py
-├── README.md
-├── setup.py
-├── tests/
-│   └── locustfile.py
