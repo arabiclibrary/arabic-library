@@ -1,0 +1,6 @@
+arabic_library_project/
+├── arabic_library.py  # الكود الرئيسي
+├── README.md          # دليل المستخدم
+├── setup.py           # ملف النشر على PyPI
+├── tests/
+│   └── locustfile.py  # اختبار أداء WebSocket
