@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name="arabic-library",
-    version="9.3",
+    version="0.0.1",
     description="مكتبة Python شاملة للمطورين الناطقين بالعربية",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="فريق المكتبة العربية",
-    author_email="support@arabic-library.org",
-    url="https://github.com/arabic-library/arabic-library",
+    author_email="aaiiddeeenn0770@gmail.com",
+    url="https://github.com/AIDENPearceID/arabic-library",
     packages=find_packages(),
     install_requires=[
         "aiohttp>=3.8.0",
