@@ -331,9 +331,9 @@ arabic_library_project/
 ---
 
 ## **الدعم**
-- **GitHub Issues**: افتح قضية على المستودع: https://github.com/arabic-library/arabic-library/issues
-- **البريد الإلكتروني**: myemail@example.com
-- **المجتمع**: انضم إلى المنتديات التقنية العربية.
+- **GitHub Issues**: افتح قضية على المستودع: https://github.com/AIDENPearceID/arabic-library/issues
+- **البريد الإلكتروني**: aaiiddeenn0770@gmail.com
+- **المجتمع**: غير متوفر .
 
 ---
 
