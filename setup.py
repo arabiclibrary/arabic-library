@@ -1,13 +1,20 @@
 from setuptools import setup, find_packages
 
+# التحقق من وجود README.md وتحميل محتواه
+try:
+    with open("README.md", encoding="utf-8") as f:
+        long_description = f.read()
+except FileNotFoundError:
+    long_description = "مكتبة Python قوية ومتعددة الاستخدامات مصممة خصيصًا للمطورين الناطقين بالعربية."
+
 setup(
     name="arabic-library",
-    version="0.0.1",
-    description="مكتبة Python شاملة للمطورين الناطقين بالعربية",
-    long_description=open("README.md", encoding="utf-8").read(),
+    version="0.0.1",  
+    description="مكتبة Python قوية ومتعددة الاستخدامات مصممة خصيصًا للمطورين الناطقين بالعربية",
+    long_description=long_description,
     long_description_content_type="text/markdown",
-    author="فريق المكتبة العربية",
-    author_email="aaiiddeeenn0770@gmail.com",
+    author=" ",
+    author_email="aaiiddeenn0770@gmail.com",
     url="https://github.com/AIDENPearceID/arabic-library",
     packages=find_packages(),
     install_requires=[
@@ -34,4 +41,3 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
-)
