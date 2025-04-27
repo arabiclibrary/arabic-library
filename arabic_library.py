@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-المكتبة العربية الشاملة - الإصدار المتميز 9.3
+المكتبة العربية الشاملة - الإصدار المتميز 0.0.1
 يتضمن دعم GraphQL، Redis، طلبات دفعية، WebSocket، وتوثيق OpenAPI
 """
 
@@ -35,7 +35,7 @@ import websockets
 from aiohttp import ClientSession
 import aioredis
 
-__version__ = "9.3"
+__version__ = "0.0.1"
 
 # إعداد التدويل (i18n)
 locale.setlocale(locale.LC_ALL, 'ar_SA.UTF-8')
